@@ -38,7 +38,8 @@
             <tr style="text-align: center;">
                 <th>Nome</th>
                 <th style="width: 10em;">CPF</th>
-                <th>Usuário</th>
+                <th style="width: 4em;">UF</th>
+                <th style="width: 20em;">Cidade</th>
                 <th style="width: 8em;">Situação</th>
                 <th style="width: 7em;">Opções</th>
             </tr>
@@ -47,16 +48,17 @@
             <tr class="ui-selectable-row" style="text-align: center;">
                 <td>{{rowData.nome}}</td>
                 <td>{{rowData.cpf}}</td>
-                <td>{{rowData.usuario.email}}</td>
-                <td [style.color]="rowData.situacao === 'ATIVO' ? 'green' : 'red'">
-                    {{rowData.situacao}}
+                <td>{{rowData.endereco===null?'':rowData.endereco.uf}}</td>
+                <td>{{rowData.endereco===null?'':rowData.endereco.cidade}}</td>
+                <td [style.color]="rowData.situacao==='ATIVO'?'green':'red'">
+                    {{rowData.situacao}} 
                 </td>
                 <td class="opcoes">
                     <button class="ui-button-rounded ui-button-secondary"
                     pButton icon="pi pi-pencil" (click)="getPessoa(rowData.id)"></button>
                     <button class="ui-button-rounded ui-button-secondary"
                     pButton icon="pi pi-trash" (click)="confirmarExclusao(rowData.id)"
-                    [disabled]="!auth.temPermissao('ROLE_ADMINISTRADOR')"></button>
+                    [disabled]="!auth.temPermissao('ROLE_REMOVER_PESSOA')"></button>
                 </td>
             </tr>
         </ng-template>
@@ -67,15 +69,17 @@
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
             </tr>
         </ng-template>
     </p-table>
     </div>
 </div>
 
-
-<app-pessoa-form [pessoa]="pessoaForm" [display]="displayFormPessoa" (eventDisplay)="displayFormPessoa=$event" 
-(retornoPersistencia)="getEventFormPessoa($event)"></app-pessoa-form>
+<p-dialog [(visible)]="displayFormPessoa" [modal]="true" [style]="{width: '95%'}" 
+[header]="pessoaForm.id === 0 ? 'Nova pessoa' : 'Edição de pessoa'">
+    <app-pessoa-form [pessoa]="pessoaForm"></app-pessoa-form>
+</p-dialog>
 
 <p-confirmDialog header="Alerta" icon="pi pi-exclamation-triangle" #confirmacao>
     <p-footer>

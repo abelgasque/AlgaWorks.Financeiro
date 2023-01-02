@@ -13,29 +13,29 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "contato")
+@Table(name = "CONTATO")
 public class Contato {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name="ID")
 	private Long id;
 	
 	@NotEmpty
-	@Column(name="nome")
+	@Column(name="NOME")
 	private String nome;
 	
 	@Email
 	@NotNull
-	@Column(name="email")
+	@Column(name="EMAIL")
 	private String email;
 	
 	@NotEmpty
-	@Column(name="telefone")
+	@Column(name="TELEFONE")
 	private String telefone;
 	
 	@ManyToOne
-	@JoinColumn(name = "id_pessoa")
+	@JoinColumn(name = "ID_PESSOA")
 	private Pessoa pessoa;
 	
 	@Override

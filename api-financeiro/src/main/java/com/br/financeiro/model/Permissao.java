@@ -10,17 +10,17 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name="permissao")
+@Table(name="PERMISSAO")
 public class Permissao {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name="ID")
 	private Long id;
 	
 	@NotNull
 	@Size(max= 50)
-	@Column(name="descricao")
+	@Column(name="DESCRICAO")
 	private String descricao;
 
 	@Override

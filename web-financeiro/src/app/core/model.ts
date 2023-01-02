@@ -20,20 +20,6 @@ export class Contato{
     telefone: string;
 }
 
-export class Permissao{
-    id: number;
-    descricao: string;
-}
-
-export class Usuario{
-    id: number = 0;
-    nome: string;
-    email: string;
-    senha: string; 
-    permissoes: any[] = [];
-    situacao: string = 'ATIVO';
-}
-
 export class Pessoa{
     id: number = 0;
     nome: string;
@@ -41,7 +27,6 @@ export class Pessoa{
     endereco = new Endereco();
     situacao = 'ATIVO';
     contatos = new Array<Contato>();
-    usuario = new Usuario();
 } 
 
 export class Lancamento{
@@ -54,8 +39,6 @@ export class Lancamento{
     tipo = 'RECEITA';
     categoria = new Categoria();
     pessoa = new Pessoa();
-    anexo: string = null;
-    urlAnexo: string = null;
 }
 
 export class LancamentoFilter{
@@ -75,4 +58,9 @@ export class PessoaFilter{
     pagina = 0;
     itensPorPagina = 10;
     total = 0;
+}
+
+export class Usuario{
+    email: string;
+    senha: string; 
 }

@@ -1,88 +1,123 @@
 import { Component, OnInit } from '@angular/core';
+import { ChartType, ChartOptions, ChartDataSets } from 'chart.js';
+import { Label } from 'ng2-charts';
+import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { DashboardService } from '../dashboard.service';
-import { Router } from '@angular/router';
-
+import { AuthService } from 'src/app/seguranca/auth.service';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
+import { throwError } from 'rxjs';
 @Component({
   selector: 'app-dashboard-admin',
   templateUrl: './dashboard-admin.component.html',
   styleUrls: ['./dashboard-admin.component.css']
 })
 export class DashboardAdminComponent implements OnInit {
+  // Pie
+  pieChartOptions: ChartOptions = {
+    responsive: true,
+    legend: {
+      position: 'top',
+    },
+    plugins: {
+      datalabels: {
+        formatter: (value, ctx) => {
+          const label = ctx.chart.data.labels[ctx.dataIndex];
+          return label;
+        },
+      },
+    }
+  };
+  pieChartLabels: Label[] = [];
+  pieChartData: number[] = [];
+  pieChartType: ChartType = 'pie';
+  pieChartLegend = true;
+  pieChartColors = [
+    {
+      backgroundColor: ['rgba(118,180,250)', 'rgba(181,250,179)','rgba(240,152,152)',
+      'rgba(250,250,170)', 'rgba(150,250,250)','rgba(200,170,250)'
+      ],
+    },
+  ];
 
-  displayChartDinamic: boolean = true;
-  displayChartPieCategoria: boolean = true;
-  displayChartPieTipo: boolean = true;
+  //Dynamic
+  diasDoMes = [];
   totaisReceitas = [];
-  totaisDespesas = [];
-  anoReferencia: number = 2020;
+  totaisDespesas=[];
+  barChartOptions: ChartOptions = {
+    responsive: true,
+    scales: { xAxes: [{}], yAxes: [{}] },
+  };
+  barChartLabels: Label[] = [];
+  barChartType: ChartType = 'line';
+  barChartLegend = true;
+  barChartData: ChartDataSets[] = [
+    { data: this.totaisDespesas, label: 'Despesas'},
+    { data: this.totaisReceitas, label: 'Receitas'}
+  ];
+  
+  constructor(private dashboardService: DashboardService) { }
 
-  pieChartLabels: any[] = [];
-  pieChartData: any[] = [];
-  receitas: number = 0.0;
-  despesas: number = 0.0;
-
-  constructor(private dashboardService: DashboardService) {
-    this.configurarGraficoPiePorCategoria();
-    this.confirgurarGraficoDinamic(this.anoReferencia);
-    this.configurarGraficoPiePorTipo();
+  ngOnInit(): void {
+   this.configurarGraficoPizza();
+   this.confirgurarGraficoDinamic();
+  }
+  
+  configurarGraficoPizza(){
+    this.dashboardService.estatisticasLancamentosPorCategoria()
+    .then(dados =>{
+      this.pieChartLabels = dados.map(dado => dado.categoria.nome);
+      this.pieChartData = dados.map(dado => dado.total);
+    })
+    .catch(erro =>{
+      console.log(erro);
+    });
   }
 
-  ngOnInit(): void { }
+  confirgurarGraficoDinamic(){
+    this.dashboardService.estatisticasLancamentosPorDia()
+    .then(response =>{
+      this.configurarDiasMes();
+      this.totaisReceitas = this.totalPorCadaDiaMes(response.filter(dado => dado.tipo === 'RECEITA'), this.diasDoMes);
+      this.totaisDespesas = this.totalPorCadaDiaMes(response.filter(dado => dado.tipo === 'DESPESA'), this.diasDoMes);
+        this.barChartData = [
+          { data: this.totaisDespesas, label: 'Despesas'},
+          { data: this.totaisReceitas, label: 'Receitas'}
+        ];
+    })
+    .catch(erro =>{
+      console.log(erro);
+    });
+  }
 
-  configurarGraficoPiePorTipo() {
-    this.dashboardService.estatisticasLancamentosPorTipoMensal()
-      .then(dados => {
-        console.log(dados);
-        if (dados.length>0) {
-          for (let i = 0; i < dados.length; i++) {
-            if(dados[i].tipo === 'RECEITA'){
-              this.receitas += dados[i].total;
-            }else{
-              this.despesas += dados[i].total;
-            }
-          }
-          console.log(this.receitas);
-          console.log(this.despesas);
+  private totalPorCadaDiaMes(dados, diasDoMes){
+    let totais: number[] = [];
+    for(const dia of diasDoMes){
+      let total = 0;
+      for(const dado of dados){
+        if(dado.dia.getDate() === dia){
+          total = dado.total;
+          break;
         }
-        this.displayChartPieTipo = false;
-      })
-      .catch(erro => {
-        console.log(erro);
-      });
+      }
+      totais.push(total);
+    }
+    return totais;
   }
 
-  configurarGraficoPiePorCategoria() {
-    this.dashboardService.estatisticasLancamentosPorCategoria(0)
-      .then(dados => {
-        this.pieChartLabels = dados.map(dado => dado.categoria.nome);
-        this.pieChartData = dados.map(dado => dado.total);
-        this.displayChartPieCategoria = false;
-      })
-      .catch(erro => {
-        console.log(erro);
-      });
+  private configurarDiasMes(){
+    const mesReferencia = new Date();
+    mesReferencia.setMonth(mesReferencia.getMonth()-1);
+    mesReferencia.setDate(0);
+    const quantidade = mesReferencia.getDate();
+    for(let i=1; i<=quantidade; i++){
+      this.barChartLabels.push(`${i}`);
+      this.diasDoMes.push(i);
+    }
   }
-
-  confirgurarGraficoDinamic(ano: number) {
-    this.dashboardService.estatisticasLancamentosPorMes(ano, 0)
-      .then(response => {
-        if (response.length > 0) {
-          for (let i = 0; i < response.length; i++) {
-            if (response[i].tipo == "RECEITA") {
-              this.totaisReceitas.push(response[i].total);
-            } else {
-              this.totaisDespesas.push(response[i].total);
-            }
-          }
-        } else {
-          this.totaisDespesas = [];
-          this.totaisReceitas = [];
-        }
-        this.displayChartDinamic = false;
-      })
-      .catch(erro => {
-        console.log(erro);
-      });
+  
+  public randomize(): void {
+    this.barChartType = this.barChartType === 'bar' ? 'line' : 'bar';
   }
 
 }

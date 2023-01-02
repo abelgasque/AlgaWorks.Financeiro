@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpParams, HttpClient} from '@angular/common/http';
+import { HttpParams} from '@angular/common/http';
 
+import { GenericHttp } from 'src/app/seguranca/generic-http';
 import { environment } from 'src/environments/environment';
 import { PessoaFilter } from 'src/app/core/model';
 
@@ -10,12 +11,7 @@ import { PessoaFilter } from 'src/app/core/model';
 })
 export class PessoasService {
 
-  urlPessoa : string;
-
-  constructor(
-    private http: HttpClient) {
-    this.urlPessoa = `${environment.apiUrl}/pessoas`;
-   }
+  constructor(private http: GenericHttp) { }
 
   pesquisar(filtro: PessoaFilter): Promise<any>{
     let params = new HttpParams({
@@ -30,7 +26,7 @@ export class PessoasService {
     if(filtro.cpf){
       params = params.append('cpf', filtro.cpf);
     }
-    return this.http.get<any>(`${this.urlPessoa}/pesquisar?resumo`,{params})
+    return this.http.get<any>(`${environment.apiUrl}/pessoas/pesquisar`,{params})
     .toPromise()
     .then(response => {
       const pessoas = response.content;
@@ -43,26 +39,22 @@ export class PessoasService {
   }
 
   salvar(entidade: any): Promise<any> {
-    return this.http.post<any>(`${this.urlPessoa}/adicionar`, entidade).toPromise();
+    return this.http.post<any>(`${environment.apiUrl}/pessoas`, entidade).toPromise();
   }
   
   editar(entidade: any): Promise<any> {
-    return this.http.put<any>(`${this.urlPessoa}`, entidade).toPromise();
+    return this.http.put<any>(`${environment.apiUrl}/pessoas`, entidade).toPromise();
   }
 
   buscarPorId(id: number): Promise<any> {
-    return this.http.get<any>(`${this.urlPessoa}/${id}`).toPromise();
-  }
-
-  buscarPorUsuarioId(id: number): Promise<any> {
-    return this.http.get<any>(`${this.urlPessoa}/buscar-por-usuario/${id}`).toPromise();
+    return this.http.get<any>(`${environment.apiUrl}/pessoas/${id}`).toPromise();
   }
 
   listar(): Promise<any> {
-    return this.http.get(`${this.urlPessoa}`).toPromise();
+    return this.http.get(`${environment.apiUrl}/pessoas`).toPromise();
   }
 
   excluir(id: number): Promise<any>{
-    return this.http.delete(`${this.urlPessoa}/${id}`).toPromise();
+    return this.http.delete(`${environment.apiUrl}/pessoas/${id}`).toPromise();
   }
 }

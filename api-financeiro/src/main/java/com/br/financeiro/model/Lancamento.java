@@ -13,58 +13,57 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name="lancamento")
+@Table(name="LANCAMENTO")
 public class Lancamento {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name="ID")
 	private Long id;
 
 	@NotNull
 	@Size(max= 50)
-	@Column(name="descricao")
+	@Column(name="DESCRICAO")
 	private String descricao;
 
 	@NotNull
-	@Column(name="data_vencimento")
+	@Column(name="DATA_VENCIMENTO")
 	private LocalDate dataVencimento;
 	
-	@Column(name="data_pagamento")
+	@Column(name="DATA_PAGAMENTO")
 	private LocalDate dataPagamento;
 	
 	@NotNull
-	@Column(name="valor")
+	@Column(name="VALOR")
 	private BigDecimal valor;
 	
 	@Size(max= 100)
-	@Column(name="observacao")
+	@Column(name="OBSERVACAO")
 	private String observacao;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(name="tipo")
+	@Column(name="TIPO")
 	private TipoLancamento tipo;
 	
 	@ManyToOne(optional = false)
-	@JoinColumn(name="id_categoria")
+	@JoinColumn(name="ID_CATEGORIA")
 	private Categoria categoria;
 	
 	@ManyToOne(optional = false)
-	@JoinColumn(name="id_pessoa")
+	@JoinColumn(name="ID_PESSOA")
 	private Pessoa pessoa;
 	
-	@Size(max= 200)
-	@Column(name="anexo")
+	@Column(name="ANEXO")
 	private String anexo;
 	
-	@Size(max= 200)
-	@Column(name="url_anexo")
+	@Transient
 	private String urlAnexo;
 	
 	@JsonIgnore

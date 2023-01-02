@@ -10,18 +10,18 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name="categoria")
+@Table(name="CATEGORIA")
 public class Categoria {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name="ID")
 	private Long id;
 	
 
 	@NotNull
 	@Size(min= 5, max= 50)
-	@Column(name="nome")
+	@Column(name="NOME")
 	private String nome;
 
 	public Long getId() {

@@ -2,7 +2,6 @@ package com.br.financeiro.resource;
 
 import java.util.Optional;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -38,52 +37,43 @@ public class PessoaResource {
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR') and #oauth2.hasScope('read')")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	@GetMapping("/pesquisar")
 	public ResponseEntity<?> pesquisar(PessoaFilter filtro, Pageable pageable) {
 		 Page<Pessoa> lista = pessoaService.pesquisar(filtro, pageable);
 		 return new ResponseEntity<Page<Pessoa>>(lista,HttpStatus.OK);
 	}
 	
-	@PostMapping("/adicionar")
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('write')")
+	@PostMapping
 	public ResponseEntity<?> salvar(@Valid @RequestBody Pessoa entidade, HttpServletResponse response) {
 		Pessoa entidadeSalva = pessoaService.salvar(entidade);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, entidadeSalva.getId()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva);
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('write')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('write')")
 	@PutMapping
 	public ResponseEntity<?> editar(@RequestBody Pessoa entidade){
 		Pessoa entidadeSalva = this.pessoaService.editar(entidade);	
 		return new  ResponseEntity<Pessoa>(entidadeSalva,HttpStatus.OK);
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> buscar(@PathVariable("id") Long id) {
 		 Optional<Pessoa> entidade = pessoaService.buscarPorId(id);
 		 return entidade != null ? ResponseEntity.ok(entidade) : ResponseEntity.notFound().build();
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
-	@GetMapping("/buscar-por-usuario/{idUsuario}")
-	public ResponseEntity<?> buscarUsuarioById(@PathVariable("idUsuario") Long idUsuario) {
-		Optional<Pessoa> entidade = pessoaService.buscarUsuarioById(idUsuario);
-		return entidade.isPresent() ? ResponseEntity.ok(entidade) : ResponseEntity.notFound().build();
-	}
-	
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR') and #oauth2.hasScope('read')")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	@GetMapping
 	public ResponseEntity<?> listar(){
 		Iterable<Pessoa> lista = this.pessoaService.listar();
 		return new ResponseEntity<Iterable<Pessoa>>(lista,HttpStatus.OK);
 	}
 	
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_PESSOA')")
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void excluir(@PathVariable("id") Long id){

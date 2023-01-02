@@ -2,7 +2,6 @@ package com.br.financeiro.resource;
 
 import java.util.Optional;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -36,37 +35,36 @@ public class CategoriaResource {
 	private ApplicationEventPublisher publisher;
 	
 	@PostMapping
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR') and #oauth2.hasScope('write')")
-	public ResponseEntity<?> adicionar(@Valid @RequestBody Categoria entidade, HttpServletResponse response) {
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_CATEGORIA') and #oauth2.hasScope('write')")
+	public ResponseEntity<?> criar(@Valid @RequestBody Categoria entidade, HttpServletResponse response) {
 		Categoria entidadeSalva = categoriaService.salvar(entidade);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, entidadeSalva.getId()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva);
 	}
 	
 	@PutMapping
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR') and #oauth2.hasScope('write')")
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_CATEGORIA') and #oauth2.hasScope('write')")
 	public ResponseEntity<?> editar(@RequestBody Categoria entidade){
 		Categoria entidadeSalva = this.categoriaService.editar(entidade);	
 		return new  ResponseEntity<Categoria>(entidadeSalva,HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR') and #oauth2.hasScope('read')")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
 	public ResponseEntity<?> buscar(@PathVariable("id") Long id) {
 		 Optional<Categoria> entidade = categoriaService.buscarPorId(id);
 		 return entidade != null ? ResponseEntity.ok(entidade) : ResponseEntity.notFound().build();
 	}
 	
 	@GetMapping
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADO", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
 	public ResponseEntity<?> listar(){
 		Iterable<Categoria> lista = this.categoriaService.listar();
 		return new ResponseEntity<Iterable<Categoria>>(lista,HttpStatus.OK);
 	}
 	
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_CATEGORIA')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void excluir(@PathVariable("id") Long id){
 		this.categoriaService.excluir(id);

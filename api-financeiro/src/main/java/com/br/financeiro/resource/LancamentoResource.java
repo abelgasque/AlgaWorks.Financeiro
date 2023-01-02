@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -41,8 +40,6 @@ import com.br.financeiro.model.Lancamento;
 import com.br.financeiro.model.dto.Anexo;
 import com.br.financeiro.model.dto.LancamentoEstatisticaCategoria;
 import com.br.financeiro.model.dto.LancamentoEstatisticaDia;
-import com.br.financeiro.model.dto.LancamentoEstatisticaMes;
-import com.br.financeiro.model.dto.LancamentoEstatisticaPessoa;
 import com.br.financeiro.model.filter.LancamentoFilter;
 import com.br.financeiro.model.projection.ResumoLancamento;
 import com.br.financeiro.repository.LancamentoRepository;
@@ -71,17 +68,14 @@ public class LancamentoResource {
 	@Autowired
 	private S3 s3;
 	
-	
-	@PreAuthorize("#oauth2.hasScope('write')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
 	@PostMapping("/anexo")
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	public Anexo uploadAnexo(@RequestParam MultipartFile anexo) throws IOException {
 		String nome = s3.salvarTemporariamente(anexo);
 		return new Anexo(nome, s3.configurarUrl(nome));
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	@GetMapping("/relatorios/por-pessoa")
 	public ResponseEntity<byte[]> relatorioPorPessoa(
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate inicio, 
@@ -93,45 +87,32 @@ public class LancamentoResource {
 				.body(relatorio);
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
-	@GetMapping("/estatisticas/por-tipo-mensal")
-	public List<LancamentoEstatisticaDia> estatisticasPorTipoMensal(){
-		LocalDate mesReferencia = LocalDate.now();
-		Long idPessoa = (long) 0;
-		return this.lancamentoRepository.porDia(mesReferencia, idPessoa);
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	@GetMapping("/estatisticas/por-categoria")
+	public List<LancamentoEstatisticaCategoria> porCategoria(){
+		return this.lancamentoRepository.porCategoria(LocalDate.now());
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
-	@GetMapping("/estatisticas/por-mes/{anoReferencia}/{idPessoa}")
-	public List<LancamentoEstatisticaMes> porAno(@PathVariable("anoReferencia") int anoReferencia, @PathVariable("idPessoa") Long idPessoa){
-		return this.lancamentoService.estatisticasPorMes(anoReferencia, idPessoa);
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	@GetMapping("/estatisticas/por-dia")
+	public List<LancamentoEstatisticaDia> porDia(){
+		return this.lancamentoRepository.porDia(LocalDate.now());
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
-	@GetMapping("/estatisticas/por-pessoa-by-id/{id}")
-	public List<LancamentoEstatisticaPessoa> porPessoaById(@PathVariable("id") Long id){
-		return this.lancamentoRepository.porPessoaById(id);
-	}
-	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
-	@GetMapping("/estatisticas/por-categoria/{idPessoa}")
-	public List<LancamentoEstatisticaCategoria> porCategoria(@PathVariable("idPessoa") Long id){
-		return this.lancamentoRepository.porCategoria(LocalDate.now(), id);
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	@GetMapping("/pesquisar")
+	public ResponseEntity<?> pesquisar(LancamentoFilter filtro, Pageable pageable) {
+		 Page<Lancamento> lista = lancamentoService.pesquisar(filtro, pageable);
+		 return new ResponseEntity<Page<Lancamento>>(lista,HttpStatus.OK);
 	}
 	
 	@GetMapping(params = "resumo")
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		return lancamentoRepository.resumir(lancamentoFilter, pageable);
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('write')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	@PostMapping
 	public ResponseEntity<?> salvar(@Valid @RequestBody Lancamento entidade, HttpServletResponse response) {
 		Lancamento entidadeSalva = lancamentoService.salvar(entidade);
@@ -139,23 +120,28 @@ public class LancamentoResource {
 		return ResponseEntity.status(HttpStatus.CREATED).body(entidadeSalva);
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('write')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	@PutMapping
 	public ResponseEntity<?> editar(@RequestBody Lancamento entidade){
 		Lancamento entidadeSalva = this.lancamentoService.editar(entidade);	
 		return new  ResponseEntity<Lancamento>(entidadeSalva,HttpStatus.OK);
 	}
 	
-	@PreAuthorize("#oauth2.hasScope('read')")
-	@RolesAllowed({ "ROLE_ADMINISTRADOR", "ROLE_PESSOA" })
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> buscar(@PathVariable("id") Long id) {
 		 Optional<Lancamento> entidade = lancamentoService.buscarPorId(id);
 		 return entidade != null ? ResponseEntity.ok(entidade) : ResponseEntity.notFound().build();
 	}
 	
-	@PreAuthorize("hasAuthority('ROLE_ADMINISTRADOR')")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	@GetMapping
+	public ResponseEntity<?> listar(){
+		Iterable<Lancamento> lista = this.lancamentoService.listar();
+		return new ResponseEntity<Iterable<Lancamento>>(lista,HttpStatus.OK);
+	}
+	
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO')")
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void excluir(@PathVariable("id") Long id){

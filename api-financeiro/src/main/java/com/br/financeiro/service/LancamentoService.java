@@ -1,10 +1,8 @@
 package com.br.financeiro.service;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -24,10 +22,7 @@ import org.springframework.util.StringUtils;
 import com.br.financeiro.mailer.Mailer;
 import com.br.financeiro.model.Lancamento;
 import com.br.financeiro.model.Pessoa;
-import com.br.financeiro.model.TipoLancamento;
 import com.br.financeiro.model.Usuario;
-import com.br.financeiro.model.dto.LancamentoEstatisticaDia;
-import com.br.financeiro.model.dto.LancamentoEstatisticaMes;
 import com.br.financeiro.model.dto.LancamentoEstatisticaPessoa;
 import com.br.financeiro.model.filter.LancamentoFilter;
 import com.br.financeiro.repository.LancamentoRepository;
@@ -112,31 +107,6 @@ public class LancamentoService {
 				new JRBeanCollectionDataSource(dados));
 		
 		return JasperExportManager.exportReportToPdf(jasperPrint);
-	}
-	
-	public List<LancamentoEstatisticaMes> estatisticasPorMes(int anoReferencia, Long idPessoa) {
-		List<LancamentoEstatisticaMes> retorno = new ArrayList<LancamentoEstatisticaMes>();
-		for(int i = 1; i<=12;i++) {
-			LocalDate mesReferencia = LocalDate.of(anoReferencia, i, 1);
-			List<LancamentoEstatisticaDia> estatisticas = this.lancamentoRepository.porDia(mesReferencia, idPessoa);
-			BigDecimal totalReceitas = new BigDecimal(0.0);
-			BigDecimal totalDespesas = new BigDecimal(0.0);
-			TipoLancamento tipo = null; 
-			LancamentoEstatisticaMes estatisticaReceitasMes = new LancamentoEstatisticaMes(tipo.RECEITA, i, null);
-			LancamentoEstatisticaMes estatisticaDespesasMes = new LancamentoEstatisticaMes(tipo.DESPESA, i, null);
-			for(LancamentoEstatisticaDia estistica : estatisticas) {
-				if(estistica.getTipo().toString() == "RECEITA" && estistica.getDia().getMonthValue() == i) {
-					totalReceitas = totalReceitas.add(estistica.getTotal());
-				}else if(estistica.getTipo().toString() == "DESPESA" && estistica.getDia().getMonthValue() == i){
-					totalDespesas = totalDespesas.add(estistica.getTotal());
-				}
-			}
-			estatisticaReceitasMes.setTotal(totalReceitas);
-			estatisticaDespesasMes.setTotal(totalDespesas);
-			retorno.add(estatisticaReceitasMes);
-			retorno.add(estatisticaDespesasMes);
-		}
-		return retorno;
 	}
 	
 	public Page<Lancamento> pesquisar(LancamentoFilter filtro, Pageable pageable){

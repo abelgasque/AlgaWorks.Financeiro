@@ -15,10 +15,9 @@ import com.br.financeiro.model.projection.ResumoLancamento;
 
 public interface LancamentoRepositoryQuery {
 	
-	public List<LancamentoEstatisticaPessoa> porPessoaById(Long id);
 	public List<LancamentoEstatisticaPessoa> porPessoa(LocalDate inicio, LocalDate fim);
-	public List<LancamentoEstatisticaCategoria> porCategoria(LocalDate mesReferencia, Long idPessoa);
-	public List<LancamentoEstatisticaDia> porDia(LocalDate mesReferencia, Long idPessoa);
+	public List<LancamentoEstatisticaCategoria> porCategoria(LocalDate mesReferencia);
+	public List<LancamentoEstatisticaDia> porDia(LocalDate mesReferencia);
 	public Page<Lancamento> filtrar(LancamentoFilter lancamentoFilter, Pageable pageable);
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable);
 }

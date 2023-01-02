@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,37 +16,32 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name="usuario")
+@Table(name="USUARIO")
 public class Usuario {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name="ID")
 	private Long id;
 	
 	@NotNull
 	@Size(max= 50)
-	@Column(name="nome")
+	@Column(name="NOME")
 	private String nome;
 	
 	@NotNull
 	@Size(max= 50)
-	@Column(name="email")
+	@Column(name="EMAIL")
 	private String email;
 	
 	@NotNull
 	@Size(max= 150)
-	@Column(name="senha")
+	@Column(name="SENHA")
 	private String senha;
 	
-	@NotNull
-	@Enumerated(EnumType.STRING)
-	@Column(name="situacao")
-	private Situacao situacao;
-	
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name="usuario_permissao", joinColumns = @JoinColumn(name="id_usuario"),
-			inverseJoinColumns= @JoinColumn(name="id_permissao"))
+	@JoinTable(name="usuario_permissao", joinColumns = @JoinColumn(name="ID_USUARIO"),
+			inverseJoinColumns= @JoinColumn(name="ID_PERMISSAO"))
 	private List<Permissao> permissoes;
 	
 	@Override
@@ -114,13 +107,5 @@ public class Usuario {
 
 	public void setPermissoes(List<Permissao> permissoes) {
 		this.permissoes = permissoes;
-	}
-
-	public Situacao getSituacao() {
-		return situacao;
-	}
-
-	public void setSituacao(Situacao situacao) {
-		this.situacao = situacao;
 	}
 }

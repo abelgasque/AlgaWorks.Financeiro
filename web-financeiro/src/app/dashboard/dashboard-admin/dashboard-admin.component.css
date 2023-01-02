@@ -1,11 +1,3 @@
-.cards-top{
-    height: 200px;
-}
-
-.cards-big-charts{
-    height: 100%;
-}
-
-.bigChart{
-    max-height: 450px !important;
+.mat-card{
+    background-color: rgb(241, 236, 236);
 }

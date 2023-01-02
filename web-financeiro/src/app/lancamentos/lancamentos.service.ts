@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpParams, HttpClient} from '@angular/common/http';
+import { HttpParams} from '@angular/common/http';
 import * as moment from 'moment';
 import { environment } from 'src/environments/environment';
 import { LancamentoFilter, Lancamento } from 'src/app/core/model';
+import { GenericHttp } from 'src/app/seguranca/generic-http';
 
 
 @Injectable({
@@ -10,22 +11,13 @@ import { LancamentoFilter, Lancamento } from 'src/app/core/model';
 })
 export class LancamentosService {
 
-  urlLancamento: string;
-
-  constructor(private http: HttpClient) { 
-    this.urlLancamento =`${environment.apiUrl}/lancamentos`;
-  }
-
-  urlUploadAnexo(): string {
-    return `${this.urlLancamento}/anexo`;
-  }
+  constructor(private http: GenericHttp) { }
 
   pesquisar(filtro: LancamentoFilter): Promise<any>{
     let params = new HttpParams({
       fromObject:{
         page: filtro.pagina.toString(),
-        size: filtro.itensPorPagina.toString(),
-        pessoa: filtro.pessoa.toString()
+        size: filtro.itensPorPagina.toString()
       }
     });
     if(filtro.descricao){
@@ -37,7 +29,7 @@ export class LancamentosService {
     if(filtro.vencimentoAte){
       params = params.append('dataVencimentoAte', moment(filtro.vencimentoAte).format('YYYY-MM-DD'));
     }
-    return this.http.get<any>(`${this.urlLancamento}?resumo`, {params})
+    return this.http.get<any>(`${environment.apiUrl}/lancamentos/pesquisar`, {params})
     .toPromise()
     .then(response => {
       let lancamentos = response.content;
@@ -53,30 +45,30 @@ export class LancamentosService {
   }
 
   salvar(entidade: any): Promise<any> {
-    return this.http.post<Lancamento>(`${this.urlLancamento}`, entidade)
+    return this.http.post<Lancamento>(`${environment.apiUrl}/lancamentos`, entidade)
     .toPromise();
   }
   
   editar(entidade: any): Promise<any> {
-    return this.http.put<Lancamento>(`${this.urlLancamento}`, entidade)
+    return this.http.put<Lancamento>(`${environment.apiUrl}/lancamentos`, entidade)
     .toPromise()
     .then(response => response);
   }
 
   buscarPorId(id: number): Promise<any> {
-    return this.http.get<Lancamento>(`${this.urlLancamento}/${id}`)
+    return this.http.get<Lancamento>(`${environment.apiUrl}/lancamentos/${id}`)
     .toPromise()
     .then(response => response);
   }
 
   listar(): Promise<any> {
-    return this.http.get<any>(`${this.urlLancamento}`,)
+    return this.http.get<any>(`${environment.apiUrl}/lancamentos`,)
     .toPromise()
     .then(response => response);
   }
 
   excluir(id: number): Promise<any>{
-    return this.http.delete(`${this.urlLancamento}/${id}`)
+    return this.http.delete(`${environment.apiUrl}/lancamentos/${id}`)
     .toPromise()
     .then(response => null);
   }

@@ -12,90 +12,66 @@ import { SegurancaComponent } from './seguranca/seguranca.component';
 import { LoginFormComponent } from './seguranca/login-form/login-form.component'
 import { NaoAutorizadoComponent } from './core/nao-autorizado.component';
 import { PaginaNaoEncontradaComponent } from './core/pagina-nao-encontrada.component';
+import { UsuarioCadastroComponent } from './seguranca/usuario-cadastro/usuario-cadastro.component';
 import { RelatoriosComponent } from './relatorios/relatorios.component';
 import { RelatorioLancamentosComponent } from './relatorios/relatorio-lancamentos/relatorio-lancamentos.component';
-import { HomeComponent } from './default/home/home.component';
-import { UsuariosComponent } from './usuarios/usuarios.component';
-import { SegurancaPessoaFormComponent } from './seguranca/seguranca-pessoa-form/seguranca-pessoa-form.component';
 
 const routes: Routes = [
-  {
-    path: 'usuarios',
-    component: UsuariosComponent,
+  { path: 'lancamentos', 
+    component:  LancamentosComponent, 
     canActivate: [AuthGuard],
-    data: { roles: ['ROLE_ADMINISTRADOR'] },
+    data: { roles:['ROLE_PESQUISAR_LANCAMENTO','ROLE_CADASTRAR_LANCAMENTO']}
   },
-  {
-    path: 'lancamentos',
-    component: LancamentosComponent,
+  { 
+    path: 'pessoas', 
+    component:  PessoasComponent, 
     canActivate: [AuthGuard],
-    data: { roles: ['ROLE_ADMINISTRADOR'] }
+    data: { roles:['ROLE_PESQUISAR_PESSOA','ROLE_CADASTRAR_PESSOA']}
   },
-  {
-    path: 'pessoas',
-    component: PessoasComponent,
-    canActivate: [AuthGuard],
-    data: { roles: ['ROLE_ADMINISTRADOR'] }
-  },
-  {
-    path: 'dashboard',
-    component: DashboardComponent,
-    canActivate: [AuthGuard],
-    data: { roles: ['ROLE_ADMINISTRADOR', 'ROLE_PESSOA'] },
+  { path: 'dashboard', 
+    component:  DashboardComponent,
+    canActivate: [AuthGuard], 
     children: [
-      {
-        path: 'admin',
+      { 
+        path: 'admin', 
         component: DashboardAdminComponent,
-        canActivate: [AuthGuard],
-        data: { roles: ['ROLE_ADMINISTRADOR'] },
+        canActivate: [AuthGuard]
       },
-      {
-        path: 'pessoa',
+      { 
+        path: 'pessoa', 
         component: DashboardPessoaComponent,
-        canActivate: [AuthGuard],
-        data: { roles: ['ROLE_PESSOA'] },
+        canActivate: [AuthGuard]
       }
     ]
   },
-  {
-    path: 'relatorios',
-    component: RelatoriosComponent,
-    canActivate: [AuthGuard],
-    data: { roles: ['ROLE_ADMINISTRADOR'] },
-    children: [
-      {
-        path: 'lancamentos',
-        component: RelatorioLancamentosComponent,
-        canActivate: [AuthGuard],
-        data: { roles: ['ROLE_ADMINISTRADOR'] }
-      },
-    ]
-  },
-  {
-    path: 'seguranca',
+  { path: 'seguranca', 
     component: SegurancaComponent,
     children: [
-      {
-        path: 'login-autenticacao',
-        component: LoginFormComponent,
+      { 
+        path: 'login-autenticacao', 
+        component: LoginFormComponent, 
       },
-      {
-        path: 'pessoa/adicionar',
-        component: SegurancaPessoaFormComponent,
-      },
-      {
-        path: 'pessoa/editar',
-        component: SegurancaPessoaFormComponent,
-        data: { roles: ['ROLE_PESSOA'] }
+      { 
+        path: 'usuario-cadastro', 
+        component: UsuarioCadastroComponent, 
       }
     ]
   },
-  {
-    path: '', component: DefaultComponent,
+  { path: 'relatorios', 
+    component:  RelatoriosComponent, 
+    canActivate: [AuthGuard],
+    data: { roles:['ROLE_PESQUISAR_LANCAMENTO']},
     children: [
-      { path: '', component: HomeComponent }
+      { 
+        path: 'lancamentos', 
+        component: RelatorioLancamentosComponent,
+        canActivate: [AuthGuard],
+        data: { roles:['ROLE_PESQUISAR_LANCAMENTO']}
+      },
     ]
-  },
+  }, 
+
+  { path: '',  component:  DefaultComponent, children: [] },
   { path: '', redirectTo: '', pathMatch: 'full' },
   { path: 'nao-autorizado', component: NaoAutorizadoComponent },
   { path: 'pagina-nao-encontrada', component: PaginaNaoEncontradaComponent },

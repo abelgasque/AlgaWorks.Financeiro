@@ -1,17 +1,19 @@
 import { Injectable } from '@angular/core';
-import { HttpParams, HttpClient } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import * as moment from 'moment';
+
 import { environment } from 'src/environments/environment';
+import { GenericHttp } from '../seguranca/generic-http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RelatoriosService {
 
-  urlLancamentos: string;
+  lancamentosUrl: string;
 
-  constructor(private http: HttpClient) {
-    this.urlLancamentos = `${environment.apiUrl}/lancamentos/relatorios`;
+  constructor(private http: GenericHttp) {
+    this.lancamentosUrl = `${environment.apiUrl}/lancamentos`;
   }
 
   relatorioLancamentosPorPessoa(inicio: Date, fim: Date) {
@@ -19,7 +21,8 @@ export class RelatoriosService {
       .append('inicio', moment(inicio).format('YYYY-MM-DD'))
       .append('fim', moment(fim).format('YYYY-MM-DD'));
 
-    return this.http.get(`${this.urlLancamentos}/por-pessoa`, { params, responseType: 'blob' })
-    .toPromise();
+    return this.http.get(`${this.lancamentosUrl}/relatorios/por-pessoa`,
+      { params, responseType: 'blob' })
+      .toPromise();
   }
 }

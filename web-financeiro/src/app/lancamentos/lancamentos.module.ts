@@ -10,17 +10,15 @@ import {MatButtonModule} from '@angular/material/button';
 
 import {TableModule} from 'primeng/table';
 import {InputTextModule} from 'primeng/inputtext';
+import {CalendarModule} from 'primeng/calendar';
 import {DropdownModule} from 'primeng/dropdown';
 import {ButtonModule} from 'primeng/button';
 import {DialogModule} from 'primeng/dialog';
 import {SelectButtonModule} from 'primeng/selectbutton';
-import {CalendarModule} from 'primeng/calendar';
 import {InputTextareaModule} from 'primeng/inputtextarea';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {ConfirmationService} from 'primeng/api';
-import {FileUploadModule} from 'primeng/fileupload';
-import {TooltipModule} from 'primeng/tooltip';
-import {SplitButtonModule} from 'primeng/splitbutton';
+
 
 import { SharedModule } from 'src/app/shared/shared.module';
 import { CategoriaService } from 'src/app/util/categoria.service';
@@ -51,10 +49,7 @@ import { LancamentoFormComponent } from './lancamento-form/lancamento-form.compo
     ButtonModule,
     DialogModule,
     InputTextareaModule,
-    ConfirmDialogModule,
-    FileUploadModule,
-    TooltipModule,
-    SplitButtonModule
+    ConfirmDialogModule
   ],
   providers: [
     ConfirmationService,

@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { JwtHelperService } from '@auth0/angular-jwt';
 
@@ -18,67 +18,66 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private jwtHelper: JwtHelperService,
-    private router: Router) 
-  {
-    this.oauthTokenUrl = `${environment.apiUrl}/oauth/token`;
-    this.carregarToken();
+    private router: Router
+  ) {
+      this.carregarToken();
+      this.oauthTokenUrl = `${environment.apiUrl}/oauth/token`;
   }
 
   login(usuario: string, senha: string): Promise<void> {
     const headers = new HttpHeaders()
-      .append('Content-Type', 'application/x-www-form-urlencoded')
-      .append('Authorization', 'Basic YW5ndWxhcjpAbmd1bEByMA==');
+        .append('Content-Type', 'application/x-www-form-urlencoded')
+        .append('Authorization', 'Basic YW5ndWxhcjpAbmd1bEByMA==');
 
     const body = `username=${usuario}&password=${senha}&grant_type=password`;
-
-    return this.http.post<any>(this.oauthTokenUrl, body, { headers, withCredentials: true })
-    .toPromise()
-    .then(response => {
-      this.armazenarToken(response.access_token);
-    })
-    .catch(response => {
-      console.log(response);
-      
-      if (response.status === 400) {
-        if (response.error.error === 'invalid_grant') {
-          return Promise.reject('Usuário ou senha inválida!');
+    return this.http.post<any>(this.oauthTokenUrl, body,
+        { headers, withCredentials: true })
+      .toPromise()
+      .then(response => {
+        this.armazenarToken(response.access_token);
+      })
+      .catch(response => {
+        console.log(response);
+        
+        if (response.status === 400) {
+          if (response.error.error === 'invalid_grant') {
+            return Promise.reject('Usuário ou senha inválida!');
+          }
         }
-      }
 
-      return Promise.reject(response);
-    });
+        return Promise.reject(response);
+      });
   }
 
   obterNovoAccessToken(): Promise<void> {
-    const headers = new HttpHeaders()
-      .append('Content-Type', 'application/x-www-form-urlencoded')
-      .append('Authorization', 'Basic YW5ndWxhcjpAbmd1bEByMA==');
+    let headers = new HttpHeaders()
+    headers = headers.append('Content-Type', 'application/x-www-form-urlencoded');
+    headers = headers.append('Authorization', 'Basic YW5ndWxhcjpAbmd1bEByMA==');
+    let body = 'grant_type=refresh_token';
+    return this.http.post<any>(this.oauthTokenUrl, body,
+        { headers, withCredentials: true })
+      .toPromise()
+      .then(response => {
+        this.armazenarToken(response.access_token);
 
-    const body = 'grant_type=refresh_token';
+        console.log('Novo access token criado!');
 
-    return this.http.post<any>(this.oauthTokenUrl, body, { headers, withCredentials: true })
-    .toPromise()
-    .then(response => {
-      this.armazenarToken(response.access_token);
-
-      console.log('Novo access token criado!');
-
-      return Promise.resolve(null);
-    })
-    .catch(response => {
-      this.router.navigate(['/seguranca','login-autenticacao']);
-      console.error('Erro ao renovar token.', response);
-      return Promise.resolve(null);
-    });
+        return Promise.resolve(null);
+      })
+      .catch(response => {
+        this.router.navigate(['/seguranca','login-autenticacao']);
+        console.error('Erro ao renovar token.', response);
+        return Promise.resolve(null);
+      });
   }
 
   limparAccessToken() {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem('token');
     this.jwtPayload = null;
   }
 
   isAccessTokenInvalido() {
-    const token = localStorage.getItem("access_token");
+    let token = localStorage.getItem('token');
 
     return !token || this.jwtHelper.isTokenExpired(token);
   }
@@ -99,11 +98,11 @@ export class AuthService {
 
   private armazenarToken(token: string) {
     this.jwtPayload = this.jwtHelper.decodeToken(token);
-    localStorage.setItem("access_token", token);
+    localStorage.setItem('token', token);
   }
 
   private carregarToken() {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem('token');
 
     if (token) {
       this.armazenarToken(token);
